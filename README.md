@@ -16,9 +16,10 @@ pip install -r requirements.txt
 python analyze_session_intervals.py <ログファイル.dat> [--delimiter DELIM]
 ```
 
-- `<ログファイル.dat>`: セッションログを含むファイルへのパス。
-- `--delimiter`: 区切り文字（デフォルトはカンマ）。
+  - `<ログファイル.dat>`: セッションログを含むファイルへのパス。
+  - `--delimiter`: 区切り文字（デフォルトはカンマ）。
+  - `--no-header`: ヘッダー行がないファイルを扱う際に指定します。省略時でも自動判別を試みます。
 
-ファイルには少なくとも `session_id`, `operation`, `timestamp` の各列が必要です。`timestamp` は日時として解釈可能な文字列である必要があります。
+  ファイルには少なくとも `session_id` と `timestamp` の各列が必要です。`timestamp` は日時として解釈可能な文字列である必要があります。
 
 実行すると、各セッション内での操作間隔（秒）のヒストグラムが表示され、平均や信頼区間などの統計量が出力されます。

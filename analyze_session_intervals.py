@@ -26,9 +26,26 @@ def parse_arguments():
 
 
 def load_data(path, delimiter=",", no_header=False):
+    """Load the log data as a ``pandas.DataFrame``.
+
+    Parameters
+    ----------
+    path : str
+        Path to the log file.
+    delimiter : str, optional
+        Delimiter used in the log file.
+    no_header : bool, optional
+        If ``True``, the file is parsed without a header row.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Loaded log data with ``timestamp`` parsed as ``datetime``.
+    """
+
+    column_names = ["session_id", "timestamp", "item_id", "category"]
+
     if no_header:
-        # Most publicly available yoochoose data does not include a header row
-        column_names = ["session_id", "timestamp", "item_id", "category"]
         df = pd.read_csv(
             path,
             delimiter=delimiter,
@@ -39,10 +56,21 @@ def load_data(path, delimiter=",", no_header=False):
     else:
         df = pd.read_csv(path, delimiter=delimiter, dtype=str)
 
-    if "timestamp" not in df.columns:
-        raise ValueError("Input data must contain a 'timestamp' column")
-    if "session_id" not in df.columns:
-        raise ValueError("Input data must contain a 'session_id' column")
+        # If the required columns are missing, try interpreting the file
+        # as header-less (common with yoochoose datasets).
+        if "timestamp" not in df.columns or "session_id" not in df.columns:
+            df = pd.read_csv(
+                path,
+                delimiter=delimiter,
+                names=column_names,
+                header=None,
+                dtype=str,
+            )
+
+    if "timestamp" not in df.columns or "session_id" not in df.columns:
+        raise ValueError(
+            "Input data must contain 'session_id' and 'timestamp' columns"
+        )
 
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     return df
