@@ -5,20 +5,46 @@ import numpy as np
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="Analyze time intervals between operations in a session log")
-    parser.add_argument("dat_file", help="Path to the .dat file containing session logs")
-    parser.add_argument("--delimiter", default=",", help="Delimiter used in the .dat file (default: comma)")
+    parser = argparse.ArgumentParser(
+        description="Analyze time intervals between operations in a session log"
+    )
+    parser.add_argument(
+        "dat_file",
+        help="Path to the .dat file containing session logs",
+    )
+    parser.add_argument(
+        "--delimiter",
+        default=",",
+        help="Delimiter used in the .dat file (default: comma)",
+    )
+    parser.add_argument(
+        "--no-header",
+        action="store_true",
+        help="Specify when the input file does not contain a header row",
+    )
     return parser.parse_args()
 
 
-def load_data(path, delimiter=","):
-    df = pd.read_csv(path, delimiter=delimiter)
-    # Expect columns: session_id, operation, timestamp
-    if 'timestamp' not in df.columns:
+def load_data(path, delimiter=",", no_header=False):
+    if no_header:
+        # Most publicly available yoochoose data does not include a header row
+        column_names = ["session_id", "timestamp", "item_id", "category"]
+        df = pd.read_csv(
+            path,
+            delimiter=delimiter,
+            names=column_names,
+            header=None,
+            dtype=str,
+        )
+    else:
+        df = pd.read_csv(path, delimiter=delimiter, dtype=str)
+
+    if "timestamp" not in df.columns:
         raise ValueError("Input data must contain a 'timestamp' column")
-    if 'session_id' not in df.columns:
+    if "session_id" not in df.columns:
         raise ValueError("Input data must contain a 'session_id' column")
-    df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
     return df
 
 
@@ -47,7 +73,7 @@ def plot_histogram(diffs):
 
 def main():
     args = parse_arguments()
-    df = load_data(args.dat_file, delimiter=args.delimiter)
+    df = load_data(args.dat_file, delimiter=args.delimiter, no_header=args.no_header)
     diffs_df = compute_diffs(df)
     diffs = diffs_df['time_diff']
 
