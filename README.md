@@ -1,6 +1,6 @@
 # Session Interval Analysis
 
-このスクリプトは、セッションログファイル（`.dat`）内で各操作がどの程度の間隔で行われているかを分析します。
+このスクリプトは、CSV 形式のセッションログから各操作イベントの時間間隔を分析します。
 
 ## 環境構築
 
@@ -13,13 +13,13 @@ pip install -r requirements.txt
 ## 使い方
 
 ```
-python analyze_session_intervals.py <ログファイル.dat> [--delimiter DELIM]
+python analyze_session_intervals.py <ログファイル.csv> [--delimiter DELIM]
 ```
 
-  - `<ログファイル.dat>`: セッションログを含むファイルへのパス。
+  - `<ログファイル.csv>`: セッションログを含む CSV ファイルへのパス。
   - `--delimiter`: 区切り文字（デフォルトはカンマ）。
   - `--no-header`: ヘッダー行がないファイルを扱う際に指定します。省略時でも自動判別を試みます。
 
-  ファイルには少なくとも `session_id` と `timestamp` の各列が必要です。`timestamp` は日時として解釈可能な文字列である必要があります。
+  ファイルには `timestamp`, `visitorid`, `event`, `itemid`, `transactionid` の各列が含まれている想定です。`timestamp` は日時として解釈可能な文字列である必要があります。
 
-実行すると、各セッション内での操作間隔（秒）のヒストグラムが表示され、平均や信頼区間などの統計量が出力されます。
+実行すると、各訪問者ごとにイベント遷移（例: READ→UPDATE）の区間が集計され、遷移ごとの統計値とヒストグラムが表示されます。
